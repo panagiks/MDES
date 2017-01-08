@@ -35,6 +35,6 @@ The Simulator is configurable via `config.json`. The following options are avail
 - [ ] Simulate more Queuing models (besides M/M/c)
 - [ ] Provide the ability to simulate complex/elaborate systems descriptively through config (long-term goal)
 
-## Licence
+## License
 
 MIT
