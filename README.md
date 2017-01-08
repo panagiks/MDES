@@ -20,6 +20,16 @@
 ./MDES.py
 ```
 
+## Configuration
+
+The Simulator is configurable via `config.json`. The following options are available:
+
+* processesNum    : The number of processes that the Simulator will execute for.
+* processesLambda : Theoretical mean inter-arrival time (1/λ).
+* processorsNum   : Number of Processors in the Simulator.
+* processorLambda : Theoretical mean proccess time (1/μ).
+* log             : Setting the log level. Array, can contain "E" to log all events and "R" to log results.
+
 ## Todo
 
 - [ ] Simulate more Queuing models (besides M/M/c)
