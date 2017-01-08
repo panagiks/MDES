@@ -14,6 +14,12 @@
 * Each component is easily swappable/replaceable
 * Logging system
 
+## Execution
+
+```sh
+./MDES.py
+```
+
 ## Todo
 
 - [ ] Simulate more Queuing models (besides M/M/c)
