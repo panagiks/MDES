@@ -1,0 +1,7 @@
+{
+  "processesNum"    : 20000,
+  "processesLambda" : 1,
+  "processorsNum"   : 2,
+  "processorLambda" : 1,
+  "log"             : ["E","R"]
+}
