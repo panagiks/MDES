@@ -7,6 +7,7 @@ class Processor(object):
     """Represents a Processor with exponential process time."""
     def __init__(self, proc_time):
         self.mean_process_time = proc_time
+        self.process = None
         self.busy = False
         self.end = None
 
