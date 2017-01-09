@@ -9,7 +9,7 @@
 
 ## Features
 
-* Simulates an M/M/c queuing system.
+* Simulates an M/M/c/FIFO queuing system.
 * Object-Oriented and fully modular
 * Each component is easily swappable/replaceable
 * Logging system
@@ -32,7 +32,7 @@ The Simulator is configurable via `config.json`. The following options are avail
 
 ## Todo
 
-- [ ] Simulate more Queuing models (besides M/M/c)
+- [ ] Simulate more Queuing models (besides M/M/c/FIFO)
 - [ ] Provide the ability to simulate complex/elaborate systems descriptively through config (long-term goal)
 
 ## License
