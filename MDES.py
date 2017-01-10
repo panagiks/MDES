@@ -4,6 +4,7 @@
 from simulator import Simulator
 
 def main():
+    """Entry point function for MDES (Modular Discrete Event Simulator)."""
     sim = Simulator()
     sim.loop()
     sim.calculate_statistics()

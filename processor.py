@@ -22,11 +22,11 @@ class Processor(object):
         self.process = process
         return self.end
 
-    def processing_complete(self, now):
-        """Check and handle processing completion."""
-        if self.end == now:
-            tmp = self.process
-            self.process = None
-            self.busy = False
-            return tmp
-        return None
+    def processing_complete(self):
+        """Handle processing completion."""
+        #Time-tag the completion of the process.
+        self.process.depart(self.end)
+        tmp = self.process
+        self.process = None
+        self.busy = False
+        return tmp

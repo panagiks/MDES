@@ -4,11 +4,12 @@
 from __future__ import print_function
 import json
 from random import expovariate
+from event import Event, EvntArr, EvntDep, EvntPus, EvntPop
 from event_queue import EventQueue
 from event_types import EventTypes
+from process import Process
 from processor import Processor
 from process_queue import ProcessQueue
-from process import Process
 
 class Simulator(object):
     """Handling class for the Discrete Event Simulator."""
@@ -25,9 +26,9 @@ class Simulator(object):
             "completedProcesses" : ProcessQueue()
         }
         self.state = {
-            "now"             : 0,      #Current Simulation Time
-            "event"           : (0, 0), #Current Simulation Event
-            "servedProcesses" : 0       #Total Served Processes
+            "now"             : 0,                 #Current Simulation Time
+            "event"           : Event(None, None), #Current Simulation Event
+            "servedProcesses" : 0                  #Total Served Processes
         }
         self.statistics = {
             "mrt"            : 0, #Mean Response Time
@@ -40,27 +41,29 @@ class Simulator(object):
             EventTypes.PROCESS_DEPARTURE : self.execution_end
         }
         #Schedule the first arrival.
-        self.queues["event"].add((EventTypes.PROCESS_ARRIVAL, self.next_arrival()))
+        self.next_arrival()
 
     def event_log(self, evnt):
         """Log each event in the Simulation."""
         if "E" in self.cfg["log"]:
             with open('event.log', 'a') as logfile:
                 logfile.write("Type : %s, Time : %f\n" %
-                              (EventTypes.translate[evnt[0]], evnt[1]))
+                              (EventTypes.translate(EventTypes(), evnt.get_type()),
+                               evnt.get_time()))
 
     def next_arrival(self):
         """Schedule the next process arrival."""
-        return self.state["now"] + expovariate(self.cfg["processesLambda"])
+        schdl = self.state["now"] + expovariate(self.cfg["processesLambda"])
+        self.queues["event"].add(EvntArr(schdl))
 
     def arrival(self):
         """Handle a process arrival."""
         #Log Event
-        self.event_log((EventTypes.PROCESS_ARRIVAL, self.state["now"]))
+        self.event_log(EvntArr(self.state["now"]))
         #Create the process that just arrived.
         proc = Process(self.state["now"])
         #Schedule next arrival.
-        self.queues["event"].add((EventTypes.PROCESS_ARRIVAL, self.next_arrival()))
+        self.next_arrival()
         added = False
         #Check if a processor is available and assign the job to the first available.
         for processorn in self.processors:
@@ -77,39 +80,34 @@ class Simulator(object):
             #Insert the process in the Queue.
             self.queues["process"].push(proc)
             #Log Event
-            self.event_log((EventTypes.QUEUE_PUSH, self.state["now"]))
+            self.event_log(EvntPus(self.state["now"]))
 
     def execution_begin(self, proc, processor):
         """Schedule the completion of the current process."""
-        self.queues["event"].add((EventTypes.PROCESS_DEPARTURE,
-                                  processor.start_processing(proc, self.state["now"])))
+        end = processor.start_processing(proc, self.state["now"])
+        self.queues["event"].add(EvntDep(end, processor))
 
     def execution_end(self):
         """Handle the completion of a process."""
-        #A processor's execution is scheduled to end now, find which one.
-        for processorn in self.processors:
-            proc = processorn.processing_complete(self.state["now"])
-            if proc is not None:
-                #Log Event
-                self.event_log((EventTypes.PROCESS_DEPARTURE, self.state["now"]))
-                #Time-tag the completion of the process.
-                proc.depart(self.state["now"])
-                #Add the completed process to the store array for later data extraction.
-                self.queues["completedProcesses"].push(proc)
-                #Increase the counter for the completed processes.
-                self.state["servedProcesses"] += 1
-                #Check if there are processes waiting in the queue.
-                if not self.queues["process"].is_empty():
-                    #Log Event
-                    self.event_log((EventTypes.QUEUE_POP, self.state["now"]))
-                    #Pop the first job of the Queue
-                    proc = self.queues["process"].pop()
-                    #Time-tag the exit of the Process from the Queue.
-                    proc.exit_queue(self.state["now"])
-                    #Start Processing and Schedule its completion.
-                    self.execution_begin(proc, processorn)
-                #Since the processor with the completed job is found, stop the iteration.
-                break
+        processorn = self.state["event"].get_processor()
+        #Log Event
+        self.event_log(EvntDep(self.state["now"], processorn))
+        #Get the completed Process
+        proc = processorn.processing_complete()
+        #Add the completed process to the store array for later data extraction.
+        self.queues["completedProcesses"].push(proc)
+        #Increase the counter for the completed processes.
+        self.state["servedProcesses"] += 1
+        #Check if there are processes waiting in the queue.
+        if not self.queues["process"].is_empty():
+            #Log Event
+            self.event_log(EvntPop(self.state["now"]))
+            #Pop the first job of the Queue
+            proc = self.queues["process"].pop()
+            #Time-tag the exit of the Process from the Queue.
+            proc.exit_queue(self.state["now"])
+            #Start Processing and Schedule its completion.
+            self.execution_begin(proc, processorn)
 
     def loop(self):
         """Main loop, determine execution length."""
@@ -117,9 +115,9 @@ class Simulator(object):
             #Get the first event from the event Queue.
             self.state["event"] = self.queues["event"].pop()
             #Move current time forward to current event's time.
-            self.state["now"] = self.state["event"][1]
+            self.state["now"] = self.state["event"].get_time()
             #Execute action associated with the current event.
-            self.translation_dictionary[self.state["event"][0]]()
+            self.translation_dictionary[self.state["event"].get_type()]()
 
     def calculate_statistics(self):
         """Calculate Statistics about the Simulation."""
@@ -132,32 +130,32 @@ class Simulator(object):
         queue = EventQueue()
         for process in processes:
             self.statistics["mrt"] += (process.departed - process.arrived)
-            system.add((EventTypes.PROCESS_ARRIVAL, process.arrived))
-            system.add((EventTypes.PROCESS_DEPARTURE, process.departed))
+            system.add(EvntArr(process.arrived))
+            system.add(EvntDep(process.departed, None))
             if process.entered_queue:
                 self.statistics["mwt"] += (process.exited_queue - process.entered_queue)
-                queue.add((EventTypes.QUEUE_PUSH, process.entered_queue))
-                queue.add((EventTypes.QUEUE_POP, process.exited_queue))
+                queue.add(EvntPus(process.entered_queue))
+                queue.add(EvntPop(process.exited_queue))
         self.statistics["mrt"] /= self.cfg["processesNum"]
         self.statistics["mwt"] /= self.cfg["processesNum"]
         system_array = system.dump()
         queue_array = queue.dump()
         previus_time = 0
         for job in system_array:
-            system_time += (job[1] - previus_time) * system_num
-            previus_time = job[1]
-            if job[0] == EventTypes.PROCESS_ARRIVAL:
+            system_time += (job.get_time() - previus_time) * system_num
+            previus_time = job.get_time()
+            if job.get_type() == EventTypes.PROCESS_ARRIVAL:
                 system_num += 1
-            elif job[0] == EventTypes.PROCESS_DEPARTURE:
+            elif job.get_type() == EventTypes.PROCESS_DEPARTURE:
                 system_num -= 1
         self.statistics["avgNumInSystem"] = system_time / self.state["now"]
         previus_time = 0
         for job in queue_array:
-            queue_time += (job[1] - previus_time) * queue_num
-            previus_time = job[1]
-            if job[0] == EventTypes.QUEUE_PUSH:
+            queue_time += (job.get_time() - previus_time) * queue_num
+            previus_time = job.get_time()
+            if job.get_type() == EventTypes.QUEUE_PUSH:
                 queue_num += 1
-            elif job[0] == EventTypes.QUEUE_POP:
+            elif job.get_type() == EventTypes.QUEUE_POP:
                 queue_num -= 1
         self.statistics["avgNumInQueue"] = queue_time / self.state["now"]
         self.results_log()

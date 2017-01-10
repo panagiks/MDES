@@ -11,8 +11,8 @@ class EventQueue(object):
 
     def add(self, event):
         """Insert Event in Queue, maintain ordered state."""
-        pos = bisect.bisect_right(self.index, event[1])
-        self.index[pos:pos] = [event[1]]
+        pos = bisect.bisect_right(self.index, event.get_time())
+        self.index[pos:pos] = [event.get_time()]
         self.queue[pos:pos] = [event]
 
     def pop(self):
