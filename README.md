@@ -3,7 +3,7 @@
 
 ![MIT Licence](https://img.shields.io/badge/Licence-MIT_Licence-red.svg?style=plastic)
 [![Python 2.7](https://img.shields.io/badge/Python-2.7-yellow.svg?style=plastic)](https://www.python.org/)
-![v0.0.1](https://img.shields.io/badge/Release-v0.0.1-orange.svg?style=plastic)
+![v0.0.2](https://img.shields.io/badge/Release-v0.0.2-orange.svg?style=plastic)
 ![Maintained](https://img.shields.io/badge/Maintained-Yes-green.svg?style=plastic)
 [![Twitter](https://img.shields.io/badge/Twitter-@Panagiks-blue.svg?style=plastic)](https://twitter.com/panagiks)
 
