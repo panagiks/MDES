@@ -2,8 +2,8 @@
 > MDES is a Modular Discrete Event Simulator written in Python.
 
 ![MIT Licence](https://img.shields.io/badge/Licence-MIT_Licence-red.svg?style=plastic)
-[![Python 2.7](https://img.shields.io/badge/Python-2.7-yellow.svg?style=plastic)](https://www.python.org/)
-![v0.0.2](https://img.shields.io/badge/Release-v0.0.2-orange.svg?style=plastic)
+[![Python 3.x](https://img.shields.io/badge/Python-3.x-yellow.svg?style=plastic)](https://www.python.org/)
+![v0.1.0](https://img.shields.io/badge/Release-v0.1.0-orange.svg?style=plastic)
 ![Maintained](https://img.shields.io/badge/Maintained-Yes-green.svg?style=plastic)
 [![Twitter](https://img.shields.io/badge/Twitter-@Panagiks-blue.svg?style=plastic)](https://twitter.com/panagiks)
 
@@ -13,11 +13,18 @@
 * Object-Oriented and fully modular
 * Each component is easily swappable/replaceable
 * Logging system
+* Simulation progress tracking
+
+## Instalation
+
+```sh
+pip install mdes
+```
 
 ## Execution
 
 ```sh
-./MDES.py
+mdes -c config.json
 ```
 
 ## Configuration
@@ -28,7 +35,7 @@ The Simulator is configurable via `config.json`. The following options are avail
 * processesLambda : Theoretical mean inter-arrival time (1/λ).
 * processorsNum   : Number of Processors in the Simulator.
 * processorLambda : Theoretical mean proccess time (1/μ) of each processor.
-* log             : Setting the log level. Array, can contain "E" to log all events and "R" to log results.
+* logging         : Setting regarding logging. Follows `logging` package's stracture.
 
 ## Todo
 
