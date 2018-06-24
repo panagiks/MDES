@@ -1,6 +1,6 @@
-#!/usr/bin/env python2
 # -*- coding: UTF-8 -*-
 """Implements a Process in MDES, individually stores metrics."""
+
 
 class Process(object):
     """Each object represents a Process in the Simulator."""
